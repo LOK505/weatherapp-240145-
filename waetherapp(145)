@@ -1,0 +1,97 @@
+import tkinter as tk
+import requests
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+
+# ---------------- TRAIN MODEL ----------------
+df = pd.read_csv("xyz.csv")
+df = df.dropna()
+
+X = df[['humidity', 'meanpressure', 'wind_speed']]
+y = df['meantemp']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# ---------------- FUNCTION ----------------
+def predict_weather():
+    city = entry.get().strip()
+
+    if city == "":
+        result.config(text=" Please enter a city name")
+        return
+
+    try:
+      
+        geo_url = f"url"
+        
+
+        if 'results' not in geo_data:
+            result.config(text=" City not found")
+            return
+
+        lat = geo_data['results'][0]['latitude']
+        lon = geo_data['results'][0]['longitude']
+
+        
+        weather_url = f"url"
+        weather_data = requests.get(weather_url).json()
+
+        humidity = weather_data['hourly']['relative_humidity_2m'][0]
+        pressure = weather_data['hourly']['pressure_msl'][0]
+        wind_speed = weather_data['current_weather']['windspeed']
+
+        
+        input_data = pd.DataFrame([[humidity, pressure, wind_speed]],
+                                 columns=['humidity', 'meanpressure', 'wind_speed'])
+
+        prediction = model.predict(input_data)[0]
+
+      
+        result.config(text=f"""
+City: {city.title()}
+Humidity: {humidity}
+Pressure: {pressure}
+Wind Speed: {wind_speed}
+Predicted Temp: {prediction:.2f} °C
+""")
+
+    except Exception as e:
+        result.config(text=f" Error fetching data\n{e}")
+
+# ---------------- GUI ----------------
+root = tk.Tk()
+root.title("Weather Prediction App")
+root.geometry("400x400")
+root.configure(bg="#1e1e2f")
+
+# Title
+title = tk.Label(root, text="Weather Predictor",
+                 font=("Arial", 18, "bold"),
+                 bg="#1e1e2f", fg="white")
+title.pack(pady=15)
+
+# Entry box (ONLY input now)
+entry = tk.Entry(root, font=("Arial", 14), justify="center")
+entry.pack(pady=10)
+entry.insert(0, "Enter City Name")
+
+# Result box
+result = tk.Label(root, text="", font=("Arial", 11),
+                  bg="#2c2c3e", fg="white",
+                  width=35, height=8,
+                  justify="left", anchor="w")
+result.pack(pady=15)
+
+# Button
+button = tk.Button(root, text="Predict",
+                   command=predict_weather,
+                   bg="#4CAF50", fg="white",
+                   font=("Arial", 12, "bold"),
+                   padx=10, pady=5)
+button.pack(pady=10)
+
+root.mainloop()
