@@ -42,7 +42,7 @@ def predict_weather():
 
         humidity = weather_data['hourly']['relative_humidity_2m'][0]
         pressure = weather_data['hourly']['pressure_msl'][0]
-        wind_speed = weather_data['current_weather']['windspeed']
+        
 
         
         input_data = pd.DataFrame([[humidity, pressure, wind_speed]],
